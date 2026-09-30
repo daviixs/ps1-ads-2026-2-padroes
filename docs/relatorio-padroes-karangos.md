@@ -4,9 +4,9 @@ Repositorio: https://github.com/daviixs/ps1-ads-2026-2-padroes
 
 ## 1. Contexto e objetivo
 
-O sistema Karangos ja possuia operacoes CRUD para clientes (`Customer`) e veiculos (`Car`). O repositorio entregue nao possui entidade, controller, servico ou migration para usuario; por isso, esta atividade foi aplicada somente aos dois CRUDs presentes no codigo-base.
+O sistema Karangos possui operacoes CRUD para clientes (`Customer`), veiculos (`Car`) e usuarios (`User`). O CRUD de usuario foi integrado a partir do complemento da Prova 1 e adaptado a mesma estrutura usada pelos outros dominios.
 
-O objetivo foi aplicar quatro padroes estudados - Factory Method, Decorator, Observer e Singleton - sem criar requisitos de negocio, tabelas, entidades ou endpoints. As rotas `POST`, `GET`, `PUT` e `DELETE` de clientes e veiculos foram preservadas.
+O objetivo foi aplicar quatro padroes estudados - Factory Method, Decorator, Observer e Singleton - sem criar requisitos de negocio alem dos tres CRUDs. As rotas `POST`, `GET`, `PUT` e `DELETE` de clientes, veiculos e usuarios foram preservadas.
 
 ## 2. Factory Method
 
@@ -16,7 +16,7 @@ Factory Method define um ponto de extensao para criar objetos. A classe abstrata
 
 ### Onde, quando e como foi usado
 
-Foi usado nos `POST`s dos CRUDs existentes. `CarFactory` e `CustomerFactory` herdam de `EntityFactory` e criam uma nova instancia a partir dos dados recebidos. O controller deixa de encaminhar diretamente a instancia desserializada para o servico.
+Foi usado nos `POST`s dos CRUDs existentes. `CarFactory`, `CustomerFactory` e `UserFactory` herdam de `EntityFactory` e criam uma nova instancia a partir dos dados recebidos. O controller deixa de encaminhar diretamente a instancia desserializada para o servico.
 
 ```java
 public abstract class EntityFactory<T> {
@@ -41,7 +41,7 @@ return ResponseEntity.status(HttpStatus.CREATED)
 
 ### Resultado alcancado e mudanca de requisito
 
-Nao houve requisito novo. A criacao que ja existia continua funcionando, mas agora a construcao de `Car` e `Customer` esta centralizada e uma identificacao enviada pelo cliente nao e copiada para um novo cadastro.
+Nao houve requisito novo. A criacao que ja existia continua funcionando, mas agora a construcao de `Car`, `Customer` e `User` esta centralizada e uma identificacao enviada pelo cliente nao e copiada para um novo cadastro.
 
 ## 3. Decorator
 
@@ -51,7 +51,7 @@ Decorator adiciona responsabilidades a um objeto por composicao, sem alterar sua
 
 ### Onde, quando e como foi usado
 
-Os contratos `CarCrudService` e `CustomerCrudService` representam as operacoes que os controllers usam. `CarService` e `CustomerService` mantem a persistencia original. `ValidatingCarService` e `ValidatingCustomerService` decoram esses servicos e validam os campos obrigatorios antes de encaminhar `create` ou `update` ao servico original.
+Os contratos `CarCrudService`, `CustomerCrudService` e `UserCrudService` representam as operacoes que os controllers usam. Os servicos de persistencia mantem as operacoes originais. Os decorators de validacao validam os campos obrigatorios antes de encaminhar `create` ou `update` ao servico original.
 
 ```java
 @Service
@@ -79,7 +79,7 @@ Observer cria uma relacao de publicacao e assinatura entre objetos. Um objeto pu
 
 ### Onde, quando e como foi usado
 
-Depois de criar, atualizar ou excluir um cliente ou veiculo, os servicos publicam `CrudOperationEvent`. `CrudOperationObserver` escuta o evento com `@EventListener` e registra a operacao. O servico de CRUD nao depende diretamente do registro de auditoria.
+Depois de criar, atualizar ou excluir um cliente, veiculo ou usuario, os servicos publicam `CrudOperationEvent`. `CrudOperationObserver` escuta o evento com `@EventListener` e registra a operacao. O servico de CRUD nao depende diretamente do registro de auditoria.
 
 ```java
 private void publish(CrudOperation operation, Long resourceId) {
@@ -94,7 +94,7 @@ public void onOperation(CrudOperationEvent event) {
 
 ### Resultado alcancado e mudanca de requisito
 
-Nao houve requisito novo. As operacoes que ja existiam continuam com o mesmo resultado, mas passaram a produzir um registro interno desacoplado. Outros observadores podem ser adicionados no futuro sem mudar os servicos de cliente ou veiculo.
+Nao houve requisito novo. As operacoes que ja existiam continuam com o mesmo resultado, mas passaram a produzir um registro interno desacoplado. Outros observadores podem ser adicionados no futuro sem mudar os servicos de cliente, veiculo ou usuario.
 
 ## 5. Singleton
 
@@ -124,7 +124,7 @@ Nao houve requisito novo. O registro interno de operacoes possui uma unica fonte
 
 ## 6. Testes e resultados
 
-Foram adicionados testes para as fabricas, para os decoradores com dados validos e invalidos, para a reacao do observador, para os eventos publicados pelos servicos e para a instancia singleton do Spring. Os testes MVC existentes do CRUD de veiculos tambem foram ajustados para verificar que o `POST /cars` continua compativel.
+Foram adicionados testes para as fabricas, para os decoradores com dados validos e invalidos, para a reacao do observador, para os eventos publicados pelos servicos e para a instancia singleton do Spring. Os testes MVC verificam as rotas dos CRUDs de veiculo e usuario.
 
 Comando executado:
 
@@ -132,8 +132,8 @@ Comando executado:
 ./mvnw test -Djava.version=21
 ```
 
-Resultado: 14 testes executados, sem falhas, erros ou testes ignorados.
+Resultado: 21 testes executados, sem falhas, erros ou testes ignorados.
 
 ## 7. Conclusao
 
-Os quatro padroes foram incorporados a funcionalidades que ja existiam no projeto. Factory Method organizou a criacao de entidades, Decorator separou a validacao da persistencia, Observer desacoplou o registro das operacoes CRUD e Singleton centralizou esse registro. A API e o banco de dados foram mantidos sem novos requisitos de negocio.
+Os quatro padroes foram incorporados aos tres CRUDs do projeto. Factory Method organizou a criacao de entidades, Decorator separou a validacao da persistencia, Observer desacoplou o registro das operacoes CRUD e Singleton centralizou esse registro. A API foi mantida com as rotas de cliente, veiculo e usuario, e a migration do usuario foi adicionada como `V4` para respeitar o historico existente do banco.
