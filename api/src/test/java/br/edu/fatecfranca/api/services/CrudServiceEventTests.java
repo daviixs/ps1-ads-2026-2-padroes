@@ -10,10 +10,12 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import br.edu.fatecfranca.api.entities.Car;
 import br.edu.fatecfranca.api.entities.Customer;
+import br.edu.fatecfranca.api.entities.User;
 import br.edu.fatecfranca.api.events.CrudOperation;
 import br.edu.fatecfranca.api.events.CrudOperationEvent;
 import br.edu.fatecfranca.api.repositories.CarRepository;
 import br.edu.fatecfranca.api.repositories.CustomerRepository;
+import br.edu.fatecfranca.api.repositories.UserRepository;
 
 class CrudServiceEventTests {
 
@@ -38,5 +40,18 @@ class CrudServiceEventTests {
         new CustomerService(repository, publisher).deleteById(1L);
 
         verify(publisher).publishEvent(new CrudOperationEvent("customer", CrudOperation.DELETED, 1L));
+    }
+
+    @Test
+    void userServicePublishesUpdatedEvent() {
+        UserRepository repository = mock(UserRepository.class);
+        ApplicationEventPublisher publisher = mock(ApplicationEventPublisher.class);
+        User user = new User();
+        user.setId(1L);
+        when(repository.save(any(User.class))).thenReturn(user);
+
+        new UserService(repository, publisher).update(user);
+
+        verify(publisher).publishEvent(new CrudOperationEvent("user", CrudOperation.UPDATED, 1L));
     }
 }

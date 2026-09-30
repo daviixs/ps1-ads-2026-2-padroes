@@ -11,9 +11,11 @@ import org.junit.jupiter.api.Test;
 
 import br.edu.fatecfranca.api.entities.Car;
 import br.edu.fatecfranca.api.entities.Customer;
+import br.edu.fatecfranca.api.entities.User;
 import br.edu.fatecfranca.api.exceptions.InvalidCrudDataException;
 import br.edu.fatecfranca.api.services.contracts.CarCrudService;
 import br.edu.fatecfranca.api.services.contracts.CustomerCrudService;
+import br.edu.fatecfranca.api.services.contracts.UserCrudService;
 
 class ValidatingCrudServiceTests {
 
@@ -59,6 +61,27 @@ class ValidatingCrudServiceTests {
                 () -> new ValidatingCustomerService(mock(CustomerCrudService.class)).create(invalid));
     }
 
+    @Test
+    void delegatesValidUserCreation() {
+        UserCrudService delegate = mock(UserCrudService.class);
+        User user = user();
+        when(delegate.create(any(User.class))).thenReturn(user);
+
+        User saved = new ValidatingUserService(delegate).create(user);
+
+        assertEquals(user, saved);
+        verify(delegate).create(user);
+    }
+
+    @Test
+    void rejectsUserWithoutUsername() {
+        User invalid = user();
+        invalid.setUsername(" ");
+
+        assertThrows(InvalidCrudDataException.class,
+                () -> new ValidatingUserService(mock(UserCrudService.class)).create(invalid));
+    }
+
     private Car car() {
         Car car = new Car();
         car.setBrand("Toyota");
@@ -82,5 +105,15 @@ class ValidatingCrudServiceTests {
         customer.setPhone("16999999999");
         customer.setEmail("maria@example.com");
         return customer;
+    }
+
+    private User user() {
+        User user = new User();
+        user.setFullname("Davi Xavier");
+        user.setUsername("davi");
+        user.setEmail("davi@example.com");
+        user.setPassword("senha-segura");
+        user.setIsAdmin(false);
+        return user;
     }
 }

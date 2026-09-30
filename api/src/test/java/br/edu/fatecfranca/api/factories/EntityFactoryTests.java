@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import br.edu.fatecfranca.api.entities.Car;
 import br.edu.fatecfranca.api.entities.Customer;
+import br.edu.fatecfranca.api.entities.User;
 
 class EntityFactoryTests {
 
@@ -43,6 +44,19 @@ class EntityFactoryTests {
         assertEquals("maria@example.com", created.getEmail());
     }
 
+    @Test
+    void userFactoryCreatesNewUserWithoutClientProvidedId() {
+        User source = user();
+        source.setId(99L);
+
+        User created = new UserFactory().create(source);
+
+        assertNotSame(source, created);
+        assertNull(created.getId());
+        assertEquals("davi", created.getUsername());
+        assertEquals(false, created.getIsAdmin());
+    }
+
     private Customer customer() {
         Customer customer = new Customer();
         customer.setName("Maria");
@@ -55,5 +69,15 @@ class EntityFactoryTests {
         customer.setPhone("16999999999");
         customer.setEmail("maria@example.com");
         return customer;
+    }
+
+    private User user() {
+        User user = new User();
+        user.setFullname("Davi Xavier");
+        user.setUsername("davi");
+        user.setEmail("davi@example.com");
+        user.setPassword("senha-segura");
+        user.setIsAdmin(false);
+        return user;
     }
 }
