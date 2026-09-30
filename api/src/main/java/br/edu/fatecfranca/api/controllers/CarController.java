@@ -14,21 +14,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.edu.fatecfranca.api.entities.Car;
-import br.edu.fatecfranca.api.services.CarService;
+import br.edu.fatecfranca.api.factories.CarFactory;
+import br.edu.fatecfranca.api.services.contracts.CarCrudService;
 
 @RestController
 @RequestMapping("/cars")
 public class CarController {
 
-    private final CarService service;
+    private final CarCrudService service;
+    private final CarFactory factory;
 
-    public CarController(CarService service) {
+    public CarController(CarCrudService service, CarFactory factory) {
         this.service = service;
+        this.factory = factory;
     }
 
     @PostMapping
     public ResponseEntity<Car> create(@RequestBody Car car) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(car));
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(factory.create(car)));
     }
 
     @GetMapping

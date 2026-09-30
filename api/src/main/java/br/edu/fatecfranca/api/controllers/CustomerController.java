@@ -14,21 +14,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.edu.fatecfranca.api.entities.Customer;
-import br.edu.fatecfranca.api.services.CustomerService;
+import br.edu.fatecfranca.api.factories.CustomerFactory;
+import br.edu.fatecfranca.api.services.contracts.CustomerCrudService;
 
 @RestController
 @RequestMapping("/customers")
 public class CustomerController {
 
-  private final CustomerService service;
+  private final CustomerCrudService service;
+  private final CustomerFactory factory;
 
-  public CustomerController(CustomerService service) {
+  public CustomerController(CustomerCrudService service, CustomerFactory factory) {
     this.service = service;
+    this.factory = factory;
   }
 
   @PostMapping
   public ResponseEntity<Customer> create(@RequestBody Customer customer) {
-    Customer savedCustomer = service.create(customer);
+    Customer savedCustomer = service.create(factory.create(customer));
 
     return ResponseEntity
             .status(HttpStatus.CREATED)

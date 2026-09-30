@@ -17,7 +17,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import br.edu.fatecfranca.api.controllers.CarController;
 import br.edu.fatecfranca.api.entities.Car;
-import br.edu.fatecfranca.api.services.CarService;
+import br.edu.fatecfranca.api.factories.CarFactory;
+import br.edu.fatecfranca.api.services.contracts.CarCrudService;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,11 +35,15 @@ class CarControllerTests {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private CarService service;
+    private CarCrudService service;
+
+    @MockitoBean
+    private CarFactory factory;
 
     @Test
     void createsAndListsCars() throws Exception {
         Car saved = car(1L, "Toyota", "ABC1D23");
+        given(factory.create(any(Car.class))).willAnswer(invocation -> invocation.getArgument(0));
         given(service.create(any(Car.class))).willReturn(saved);
         given(service.findAll()).willReturn(List.of(saved));
 

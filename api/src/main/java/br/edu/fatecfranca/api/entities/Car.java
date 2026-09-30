@@ -69,6 +69,7 @@ public class Car {
     public void setSellingDate(LocalDate sellingDate) { this.sellingDate = sellingDate; }
     public BigDecimal getSellingPrice() { return sellingPrice; }
     public void setSellingPrice(BigDecimal sellingPrice) { this.sellingPrice = sellingPrice; }
+    public Customer getCustomer() { return customer; }
     public Long getCustomerId() { return customer != null ? customer.getId() : null; }
     public void setCustomer(Customer customer) { this.customer = customer; }
 }
